@@ -1,0 +1,55 @@
+version: "3.4"
+
+services:
+  web:
+    build: ./docker/${PHP_VERSION}
+    container_name: ${PROJECT_NAME}_web
+    volumes:
+      - ./dist/:/var/www/html/
+      - ./config/php.conf.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./config/sites/:/etc/apache2/sites-enabled
+    ports:
+      - ${PORTS_PHP}
+
+  # wordpress:
+  #   build: ./docker/${WORDPRESS_VERSION}
+  #   container_name: ${PROJECT_NAME}_wp
+  #   restart: always
+  #   ports:
+  #     - ${PORTS_WP}
+  #   environment:
+  #     WORDPRESS_DB_HOST: ${PROJECT_NAME}_mysql
+  #     WORDPRESS_DB_USER: ${MYSQL_USER}
+  #     WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+  #     WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+  #   volumes:
+  #     - ./config/php.conf.ini:/usr/local/etc/php/conf.d/php.ini
+  #     - ./dist/plugins:/var/www/html/wp-content/plugins
+  #     - ./dist/themes:/var/www/html/wp-content/themes
+
+  db:
+    image: ${MYSQL_VERSION}
+    container_name: ${PROJECT_NAME}_mysql
+    volumes:
+      - ./db_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  adminer:
+    image: adminer
+    container_name: ${PROJECT_NAME}_adminer
+    restart: always
+    ports:
+      - ${PORTS_ADM}
+
+  mailhog:
+    image: mailhog/mailhog
+    restart: always
+    ports:
+      - 1025:1025
+      - 8025:8025
